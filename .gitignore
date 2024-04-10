@@ -1,0 +1,31 @@
+# Arquivos de IDE
+.vscode/
+.idea/
+
+# Ambientes Virtuais
+venv/
+env/
+*env/
+*.env
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Arquivos de Cache
+__pycache__/
+*.py[cod]
+
+# Arquivos de Build
+*.pyo
+*.pyc
+*.pyd
+*.so
+*.dll
+*.exe
+*.out
+*.app
+*.egg
+*.egg-info
+.build/
+dist/
+build/
