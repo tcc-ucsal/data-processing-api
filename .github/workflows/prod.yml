@@ -35,5 +35,8 @@ jobs:
       - name: Pull api image from docker hub
         run: docker pull grhammpabsttcc/deploy-data-processing-api:latest
 
+      - name: Remove docker container
+        run: docker rm -f deploy-data-processing-api
+
       - name: Run container
         run: docker run -d -p 8080:8080 --name deploy-data-processing-api grhammpabsttcc/deploy-data-processing-api
