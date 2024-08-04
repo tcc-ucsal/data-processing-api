@@ -5,21 +5,42 @@ from dotenv import load_dotenv, dotenv_values
 from entities import PromptText
 import requests
 import json
+import boto3
 
 load_dotenv()
 
 app = FastAPI()
 
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-model = genai.GenerativeModel('gemini-1.0-pro-latest')
-
 @app.get("/{title}")
 def generate_highlights(title: str):
     content = search_from_text_db(title)
 
-    response = genai_pipeline(content)
+    key_phrases = get_key_phrases(content)
+
+    response = genai_pipeline(title, key_phrases)
     
-    return { "Response": response.text }
+    return { "Response": response }
+
+def separate_term_from_key_phrase_object(key_phrase_object):
+    return key_phrase_object["Text"]
+
+def get_key_phrases(content):
+    client = boto3.client(
+        'comprehend',
+        aws_access_key_id=os.getenv("ACCESS_KEY"),
+        aws_secret_access_key=os.getenv("SECRET_KEY"),
+        aws_session_token=os.getenv("SESSION_TOKEN"),
+        region_name='us-east-1'
+    )
+
+    response = client.detect_key_phrases(
+        Text=content,
+        LanguageCode='en'
+    )
+
+    key_phrases_list = list(map(separate_term_from_key_phrase_object, response["KeyPhrases"]))
+
+    return list(set(key_phrases_list))
 
 def search_from_text_db(title: str) -> str:
     url = f'https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exlimit=max&explaintext&titles={title}&redirects='
@@ -39,8 +60,15 @@ def search_from_text_db(title: str) -> str:
     return content
 
 
-def genai_pipeline(text):
-    prompt = """With the following text: \n""" + text + """\nHighlight the 20 most important words to understand the subject and classify these words in
-    order from 1-5 where 1 is the most important and 5 is the less important"""
+def genai_pipeline(theme, terms):
+    genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+    model = genai.GenerativeModel('gemini-1.0-pro-latest')
+
+
+
+    terms = ';'.join(terms)
+    print(terms)
+    prompt = f"With the following theme: {theme}\nClassify these terms: {terms} in order of importance from 1 (most important) to 5 (less important) and return a tuple with (term, grade) format"
     
-    return model.generate_content(prompt + text)
+    text = model.generate_content(prompt).text
+    return text.split("\n")
