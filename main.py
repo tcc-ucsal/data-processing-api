@@ -42,8 +42,25 @@ def get_key_phrases(content):
 
     return list(set(key_phrases_list))
 
+def search_db_ref(title: str) -> str:
+    search = f'https://en.wikipedia.org/w/rest.php/v1/search/title?q={title}&limit=1'
+    search_response = requests.get(search)
+
+    search_response_json = json.loads(search_response.text)
+
+    searched_term = ""
+
+    if len(search_response_json["pages"]) > 0:
+        searched_term = search_response_json["pages"][0]["title"]
+    else:
+        raise Exception("Couldn't find searched term")
+
+    return searched_term
+
 def search_from_text_db(title: str) -> str:
-    url = f'https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exlimit=max&explaintext&titles={title}&redirects='
+    searched_term = search_db_ref(title)
+
+    url = f'https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exlimit=max&explaintext&titles={searched_term}&redirects='
     response = requests.get(url)
 
     response_json = json.loads(response.text)
@@ -57,14 +74,14 @@ def search_from_text_db(title: str) -> str:
 
     content = content[:content.index(sub_str) + len(sub_str)]
 
+    content = content.lower()
+
     return content
 
 
 def genai_pipeline(theme, terms):
     genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
     model = genai.GenerativeModel('gemini-1.0-pro-latest')
-
-
 
     terms = ';'.join(terms)
     print(terms)
