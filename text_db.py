@@ -31,9 +31,9 @@ class TextDB:
 
         for page in response_json["query"]["pages"].keys():
             content = response_json["query"]["pages"][page]["extract"]
-
+        full_text = content
         content = content[:content.index(sub_str) + len(sub_str)]
 
         content = content.lower()
 
-        return content
+        return content, full_text

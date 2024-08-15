@@ -15,10 +15,10 @@ app.key_phrase_finder = KeyPhraseFinder(os.getenv("AWS_ACCESS_KEY_ID"), os.geten
 
 @app.get("/highlight/{title}")
 def generate_highlights(title: str):
-    content = app.text_db.search_from_text_db(title)
+    content, full_text = app.text_db.search_from_text_db(title)
 
     key_phrases = app.key_phrase_finder.get_key_phrases(content)
 
     response = app.ranking.get_ranks(title, key_phrases)
     
-    return { "Response": response }
+    return { "nodes": response, "article": full_text }
