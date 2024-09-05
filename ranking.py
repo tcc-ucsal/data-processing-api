@@ -16,8 +16,6 @@ class Ranking:
             )
         ).text
 
-        print(text)
-
         return self.response_treatment(text)
 
     def response_tuple_to_dict(self, tuple):
