@@ -37,7 +37,7 @@ class TextDB:
 
 
     def search_from_text_db(self, title: str) -> (str, str, str, str):
-        searched_term = self.search_db_ref(title)
+        searched_term = self.get_db_ref(title)
 
         return self.get_content(searched_term)
 
