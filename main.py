@@ -22,3 +22,25 @@ def generate_highlights(title: str):
     response = app.ranking.get_ranks(title, key_phrases)
     
     return { "nodes": response, "article": full_text }
+
+@app.get("/get_search_options/{title}/{limit}")
+def show_search_options(title: str, limit: int):
+    results = app.text_db.get_search_options(title, limit)
+
+    return { "Results": results }
+
+@app.get("/free_highlight/{title}")
+def generate_free_highlights(title: str):
+    content, full_text = app.text_db.get_content(title)
+
+    key_phrases = app.key_phrase_finder.get_key_phrases(content)
+
+    response = app.ranking.get_ranks(title, key_phrases)
+
+    return { "nodes": response, "article": full_text }
+
+@app.get("/full_text/{title}")
+def show_full_text(title: str):
+    _content, full_text = app.text_db.get_content(title)
+
+    return { "Full text": full_text }

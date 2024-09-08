@@ -2,11 +2,14 @@ import requests
 import json
 
 class TextDB:
-    def search_db_ref(self, title: str) -> str:
-        search = f'https://en.wikipedia.org/w/rest.php/v1/search/title?q={title}&limit1'
+    def search_for_term(self, title: str, limit: int):
+        search = f'https://en.wikipedia.org/w/rest.php/v1/search/title?q={title}&limit={limit}'
         search_response = requests.get(search)
 
-        search_response_json = json.loads(search_response.text)
+        return json.loads(search_response.text)
+    
+    def get_db_ref(self, title: str) -> str:
+        search_response_json = self.search_for_term(title, 1)
 
         searched_term = ""
 
@@ -16,11 +19,30 @@ class TextDB:
             raise Exception("Couldn't find searched term")
 
         return searched_term
+    
+    def get_search_options(self, title: str, limit: int) -> [str]:
+        search_response_json = self.search_for_term(title, limit)
 
-    def search_from_text_db(self, title: str) -> str:
+        results = []
+
+        num_of_pages = len(search_response_json["pages"])
+
+        if num_of_pages > 0:
+            for i in range(num_of_pages):
+                results.append(search_response_json["pages"][i]["title"])
+        else:
+            raise Exception("Couldn't find searched term")
+
+        return results
+
+
+    def search_from_text_db(self, title: str) -> (str, str):
         searched_term = self.search_db_ref(title)
 
-        url = f'https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exlimit=max&explaintext&titles={searched_term}&redirects='
+        return self.get_content(searched_term)
+
+    def get_content(self, title: str) -> str:
+        url = f'https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exlimit=max&explaintext&titles={title}&redirects='
         response = requests.get(url)
 
         response_json = json.loads(response.text)
