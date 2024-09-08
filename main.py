@@ -15,13 +15,13 @@ app.key_phrase_finder = KeyPhraseFinder(os.getenv("AWS_ACCESS_KEY_ID"), os.geten
 
 @app.get("/highlight/{title}")
 def generate_highlights(title: str):
-    content, full_text = app.text_db.search_from_text_db(title)
+    content, full_text, source, searched_term = app.text_db.search_from_text_db(title)
 
     key_phrases = app.key_phrase_finder.get_key_phrases(content)
 
     response = app.ranking.get_ranks(title, key_phrases)
     
-    return { "nodes": response, "article": full_text }
+    return { "nodes": response, "article": full_text, "source": source, "searched_term": searched_term }
 
 @app.get("/get_search_options/{title}/{limit}")
 def show_search_options(title: str, limit: int):
@@ -31,16 +31,16 @@ def show_search_options(title: str, limit: int):
 
 @app.get("/free_highlight/{title}")
 def generate_free_highlights(title: str):
-    content, full_text = app.text_db.get_content(title)
+    content, full_text, source, searched_term = app.text_db.get_content(title)
 
     key_phrases = app.key_phrase_finder.get_key_phrases(content)
 
     response = app.ranking.get_ranks(title, key_phrases)
 
-    return { "nodes": response, "article": full_text }
+    return { "nodes": response, "article": full_text, "source": source, "searched_term": searched_term }
 
 @app.get("/full_text/{title}")
 def show_full_text(title: str):
-    _content, full_text = app.text_db.get_content(title)
+    _content, full_text, _url, _title = app.text_db.get_content(title)
 
     return { "Full text": full_text }
