@@ -41,7 +41,7 @@ class TextDB:
 
         return self.get_content(searched_term)
 
-    def get_content(self, title: str) -> str:
+    def get_content(self, title: str) -> (str, str, str, str):
         url = f'https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exlimit=max&explaintext&titles={title}&redirects='
         response = requests.get(url)
 
