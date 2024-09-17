@@ -44,3 +44,11 @@ def show_full_text(title: str):
     _content, full_text, _url, _title = app.text_db.get_content(title)
 
     return { "Full text": full_text }
+
+@app.get("/key_phrases/{title}")
+def show_key_phrases(title: str):
+    content, _full_text, _url, _title = app.text_db.get_content(title)
+
+    response = app.key_phrase_finder.get_key_phrases(content)
+
+    return response
