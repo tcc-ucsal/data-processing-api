@@ -27,7 +27,7 @@ def generate_highlights(title: str):
 def show_search_options(title: str, limit: int):
     results = app.text_db.get_search_options(title, limit)
 
-    return { "Results": results }
+    return { "results": results }
 
 @app.get("/free_highlight/{title}")
 def generate_free_highlights(title: str):
