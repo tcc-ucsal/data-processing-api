@@ -41,6 +41,10 @@ class KeyPhraseFinder:
         for phrase in phrases:
             if phrase['stemmedPhrase'] not in seen_stemmed:
                 seen_stemmed.add(phrase['stemmedPhrase'])
+                tokens = word_tokenize(phrase['originalPhrase'])
+                if tokens[0] in self.english_stopwords:
+                    phrase['originalPhrase'] = ' '.join(tokens[1:])
+
                 unique_phrases.append(phrase['originalPhrase'])
 
         return unique_phrases
