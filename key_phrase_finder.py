@@ -8,6 +8,7 @@ from nltk.stem import PorterStemmer
 class KeyPhraseFinder:
     def __init__(self, access_key, secret_key, session_token):
         self.porter_stemmer = PorterStemmer()
+        nltk.download('punkt_tab')
         nltk.download('stopwords')
         self.english_stopwords = stopwords.words('english')
         self.access_key = access_key
@@ -22,13 +23,27 @@ class KeyPhraseFinder:
         )
 
     def separate_term_from_key_phrase_object(self, key_phrase_object):
-        return re.sub(r'[^a-zA-Z0-9 ]', '', key_phrase_object["Text"])
+        return re.sub(r'[^a-zA-Z0-9 ]', '', key_phrase_object['Text'])
     
     def treat_phrase(self, phrase):
         tokens = word_tokenize(phrase.lower())
         tokens_without_stopwords = [t for t in tokens if t not in self.english_stopwords]
         phrase_without_stopwords = ''.join(tokens_without_stopwords)
-        return self.porter_stemmer.stem(phrase_without_stopwords) 
+        return {
+            'originalPhrase':  phrase,
+            'stemmedPhrase': self.porter_stemmer.stem(phrase_without_stopwords)
+        }
+
+    def removeDuplicatedStemmedPhrases(self, phrases):
+        seen_stemmed = set()
+        unique_phrases = []
+
+        for phrase in phrases:
+            if phrase['stemmedPhrase'] not in seen_stemmed:
+                seen_stemmed.add(phrase['stemmedPhrase'])
+                unique_phrases.append(phrase['originalPhrase'])
+
+        return unique_phrases
 
     def get_key_phrases(self, content):
         response = self.client.detect_key_phrases(
@@ -36,10 +51,10 @@ class KeyPhraseFinder:
             LanguageCode='en'
         )
 
-        key_phrases_list = list(map(self.separate_term_from_key_phrase_object, response["KeyPhrases"]))
+        key_phrases_list = list(map(self.separate_term_from_key_phrase_object, response['KeyPhrases']))
 
         treated_phrases_list = list(map(self.treat_phrase, key_phrases_list))
 
-        print(treated_phrases_list)
+        unique_phrases = self.removeDuplicatedStemmedPhrases(treated_phrases_list)
 
-        return list(set(key_phrases_list))
+        return unique_phrases
