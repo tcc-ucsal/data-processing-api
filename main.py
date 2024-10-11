@@ -10,7 +10,7 @@ load_dotenv()
 app = FastAPI()
 
 app.text_db = TextDB()
-app.ranking = Ranking(os.getenv("GOOGLE_API_KEY"))
+app.ranking = Ranking()
 app.key_phrase_finder = KeyPhraseFinder(os.getenv("AWS_ACCESS_KEY_ID"), os.getenv("AWS_SECRET_ACCESS_KEY"), os.getenv("AWS_SESSION_TOKEN"))
 
 @app.get("/highlight/{title}")
