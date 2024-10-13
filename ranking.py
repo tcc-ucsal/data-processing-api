@@ -1,32 +1,24 @@
-import google.generativeai as genai
+from transformers import pipeline
+import numpy
 
 class Ranking:
-    def __init__(self, api_key):
-        self.api_key = api_key
-        genai.configure(api_key=self.api_key)
-        self.model = genai.GenerativeModel('gemini-1.0-pro-latest')
+    def __init__(self):
+        self.classifier = pipeline('zero-shot-classification', model='roberta-large-mnli')
 
     def get_ranks(self, theme, terms):
-        terms = ';'.join(terms)
-        prompt = f"For the following Theme: {theme}, classify the importance of each term to the theme from 1 (most important) to 5 (less important) and return a tuple with (term|grade) format for every following term: {terms}"
+        sequence_to_classify = f"to learn about {theme}"
+        hypothesis_template = "learning about {} is really important"
 
-        text = self.model.generate_content(prompt,
-            generation_config = genai.GenerationConfig(
-                temperature=0.5
-            )
-        ).text
+        result = self.classifier(sequence_to_classify, terms, hypothesis_template=hypothesis_template)
 
-        return self.response_treatment(text)
+        return self.format_response(result)
 
-    def response_tuple_to_dict(self, tuple):
-        if tuple.startswith("(") and tuple.endswith(")"):
-            tuple = tuple[1:len(tuple)-1]
-            term, grade = tuple.split("|")
-            return {
-                "term": term,
-                "level": int(grade)
-            }
+    def response_tuple_to_dict(self, term, level):
+        
+        return {
+            "term": term,
+            "level": level
+        }
 
-    def response_treatment(self, response):
-        response = response.split("\n")
-        return list(map(self.response_tuple_to_dict, response))
+    def format_response(self, response):
+        return list(map(self.response_tuple_to_dict, response["labels"], response["scores"]))
