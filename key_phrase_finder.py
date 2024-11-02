@@ -34,31 +34,39 @@ class KeyPhraseFinder:
             'stemmedPhrase': self.porter_stemmer.stem(phrase_without_stopwords)
         }
 
-    def removeDuplicatedStemmedPhrases(self, phrases):
+    def removeDuplicatedStemmedPhrases(self, theme, phrases):
         seen_stemmed = set()
         unique_phrases = []
 
         for phrase in phrases:
             if phrase['stemmedPhrase'] not in seen_stemmed:
+                if phrase['stemmedPhrase'] == theme['stemmedPhrase']:
+                    continue
                 seen_stemmed.add(phrase['stemmedPhrase'])
                 tokens = word_tokenize(phrase['originalPhrase'])
                 if tokens[0] in self.english_stopwords:
-                    phrase['originalPhrase'] = ' '.join(tokens[1:])
+                    tokens = tokens[1:]
+                    phrase['originalPhrase'] = ' '.join(tokens)
+                if tokens[-1] in self.english_stopwords:
+                    tokens = tokens[:-1]
+                    phrase['originalPhrase'] = ' '.join(tokens)
 
                 unique_phrases.append(phrase['originalPhrase'])
 
         return unique_phrases
 
-    def get_key_phrases(self, content):
+    def get_key_phrases(self, theme, content):
         response = self.client.detect_key_phrases(
             Text=content,
             LanguageCode='en'
         )
 
+        treated_theme = self.treat_phrase(theme)
+
         key_phrases_list = list(map(self.separate_term_from_key_phrase_object, response['KeyPhrases']))
 
         treated_phrases_list = list(map(self.treat_phrase, key_phrases_list))
 
-        unique_phrases = self.removeDuplicatedStemmedPhrases(treated_phrases_list)
+        unique_phrases = self.removeDuplicatedStemmedPhrases(treated_theme, treated_phrases_list)
 
         return unique_phrases
