@@ -43,7 +43,7 @@ def generate_free_highlights(title: str):
 def show_full_text(title: str):
     _content, full_text, _url, _title = app.text_db.get_content(title)
 
-    return { "Full text": full_text }
+    return { "article": full_text }
 
 @app.get("/key_phrases/{title}")
 def show_key_phrases(title: str):
