@@ -50,6 +50,8 @@ class KeyPhraseFinder:
                 if tokens[-1] in self.english_stopwords:
                     tokens = tokens[:-1]
                     phrase['originalPhrase'] = ' '.join(tokens)
+                if phrase['originalPhrase'] == '':
+                    continue
 
                 unique_phrases.append(phrase['originalPhrase'])
 
