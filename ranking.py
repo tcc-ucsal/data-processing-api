@@ -14,8 +14,6 @@ class Ranking:
 
             result = self.classifier(sequence_to_classify, terms, hypothesis_template=hypothesis_template)
 
-            print(result)
-
             return self.format_response(result)
     
     def group_scores(self, scores, terms):

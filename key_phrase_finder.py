@@ -44,6 +44,8 @@ class KeyPhraseFinder:
                     continue
                 seen_stemmed.add(phrase['stemmedPhrase'])
                 tokens = word_tokenize(phrase['originalPhrase'])
+                if len(tokens) == 0:
+                    continue
                 if tokens[0] in self.english_stopwords:
                     tokens = tokens[1:]
                     phrase['originalPhrase'] = ' '.join(tokens)
