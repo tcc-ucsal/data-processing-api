@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 import requests
 import json
 
@@ -16,7 +17,7 @@ class TextDB:
         if len(search_response_json["pages"]) > 0:
             searched_term = search_response_json["pages"][0]["title"]
         else:
-            raise Exception("Couldn't find searched term")
+            raise HTTPException(status_code=404, detail="Couldn't find searched term")
 
         return searched_term
     
@@ -31,7 +32,7 @@ class TextDB:
             for i in range(num_of_pages):
                 results.append(search_response_json["pages"][i]["title"])
         else:
-            raise Exception("Couldn't find searched term")
+            raise HTTPException(status_code=404, detail="Couldn't find searched term")
 
         return results
 
